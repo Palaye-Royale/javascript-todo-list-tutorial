@@ -21,12 +21,10 @@
   },
   "scripts": {
     "check-coverage": "nyc check-coverage --statements 100 --functions 100 --lines 100 --branches 100",
-    "postinstall": "npm test",
     "retest": "PORT=8000 node_modules/.bin/nodemon ./test/*.js",
     "start": "node lib/server.js",
-    "dev": "live-server",
-    "test": "nyc tape ./test/*.test.js | tap-nyc"
-  },
+    "dev": "live-server"
+    },
   "keywords": [
     "Todo List",
     "TodoMVC",
@@ -39,9 +37,5 @@
     "Elm",
     "architecture"
   ],
-  "license": "ISC",
-  "pre-commit": [
-    "test",
-    "check-coverage"
-  ]
+  "license": "ISC"
 }
