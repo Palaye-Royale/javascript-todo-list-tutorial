@@ -36,5 +36,8 @@
     "Elm",
     "architecture"
   ],
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/static": "^9.1.3"
+  }
 }
