@@ -15,7 +15,6 @@
     "jsdom-global": "^3.0.2",
     "live-server": "^1.1.0",
     "nyc": "^18.0.0",
-    "pre-commit": "^2.0.0",
     "tap-nyc": "^1.0.3",
     "tape": "^5.0.1"
   },
@@ -24,7 +23,7 @@
     "retest": "PORT=8000 node_modules/.bin/nodemon ./test/*.js",
     "start": "node lib/server.js",
     "dev": "live-server"
-    },
+  },
   "keywords": [
     "Todo List",
     "TodoMVC",
