@@ -54,3 +54,10 @@ typings/
 
 # next.js build output
 .next
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+package-lock.json
