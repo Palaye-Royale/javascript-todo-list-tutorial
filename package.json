@@ -19,9 +19,9 @@
     "tape": "^5.0.1"
   },
   "scripts": {
+    "start": "node backend/server.js",
     "check-coverage": "nyc check-coverage --statements 100 --functions 100 --lines 100 --branches 100",
     "retest": "PORT=8000 node_modules/.bin/nodemon ./test/*.js",
-    "start": "node lib/server.js",
     "dev": "live-server"
   },
   "keywords": [

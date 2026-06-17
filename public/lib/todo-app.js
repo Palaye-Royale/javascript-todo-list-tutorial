@@ -18,6 +18,11 @@ var initial_model = {
  * @return {Object} new_model - the transformed model.
  */
 function update(action, model, data) {
+    // ЗАЩИТА: если модель пришла пустая или не объект — создаём пустой список
+  if (!model || typeof model !== 'object') {
+    console.warn('update получил некорректную модель, создаём пустую');
+    model = { todos: [], hash: '#/' };
+  }
   var new_model = JSON.parse(JSON.stringify(model)) // "clone" the model
 
   switch(action) {
