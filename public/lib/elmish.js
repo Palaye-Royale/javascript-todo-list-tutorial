@@ -7,7 +7,9 @@ function empty (node) {
   }
 }
 
-
+/**
+ * `mount` mounts the app in the "root" DOM Element.
+ */
 function mount (model, update, view, root_element_id, subscriptions) {
   console.log('mount вызвана!');
   var ROOT = document.getElementById(root_element_id);
@@ -15,18 +17,23 @@ function mount (model, update, view, root_element_id, subscriptions) {
 
   function render (mod, sig, root) {
     console.log('render вызван с моделью:', mod);
-    currentModel = mod; // запоминаем текущую модель
+    currentModel = mod;
 
+    // ---- ПОЛУЧАЕМ userId ИЗ sessionStorage ----
+    const userId = sessionStorage.getItem('userId');
+    // ---- КОНЕЦ ----
+
+    // ---- СОХРАНЯЕМ НА СЕРВЕР ----
     fetch('/todos/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ todos: mod.todos })
+      body: JSON.stringify({ todos: mod.todos, userId: userId })
     })
     .then(res => res.json())
     .then(data => {
       if (data.success && data.todos) {
         mod.todos = data.todos;
-        currentModel = mod; // обновляем после ответа сервера
+        currentModel = mod;
       }
       empty(root);
       root.appendChild(view(mod, sig));
@@ -40,32 +47,40 @@ function mount (model, update, view, root_element_id, subscriptions) {
 
   function signal(action, data, model) {
     return function callback() {
-      // всегда используем currentModel
       var updatedModel = update(action, currentModel, data);
       render(updatedModel, signal, ROOT);
     };
   }
 
-  // Загружаем данные с сервера
-  fetch('/todos')
-    .then(res => res.json())
-    .then(todosFromServer => {
-      console.log('Данные с сервера:', todosFromServer);
-      currentModel = { todos: todosFromServer, hash: '#/' };
-      render(currentModel, signal, ROOT);
-    })
-    .catch(err => {
-      console.error('Ошибка загрузки:', err);
-      currentModel = { todos: [], hash: '#/' };
-      render(currentModel, signal, ROOT);
-    });
+  // ---- ЗАГРУЖАЕМ ЗАДАЧИ С СЕРВЕРА ----
+  const userId = sessionStorage.getItem('userId');
+  if (userId) {
+    fetch('/todos?userId=' + userId)
+      .then(res => res.json())
+      .then(todosFromServer => {
+        console.log('Данные с сервера:', todosFromServer);
+        currentModel = { todos: todosFromServer, hash: '#/' };
+        render(currentModel, signal, ROOT);
+      })
+      .catch(err => {
+        console.error('Ошибка загрузки:', err);
+        currentModel = { todos: [], hash: '#/' };
+        render(currentModel, signal, ROOT);
+      });
+  } else {
+    // Если пользователь не авторизован, показываем пустой список
+    console.warn('Пользователь не авторизован, задачи не загружены');
+    currentModel = { todos: [], hash: '#/' };
+    render(currentModel, signal, ROOT);
+  }
+  // ---- КОНЕЦ ЗАГРУЗКИ ----
 
   if (subscriptions && typeof subscriptions === 'function') {
     subscriptions(signal);
   }
 }
 
-
+// ВСЕ ФУНКЦИИ ДЛЯ СОЗДАНИЯ ЭЛЕМЕНТОВ (они не менялись)
 function add_attributes (attrlist, node) {
   if(attrlist && Array.isArray(attrlist) && attrlist.length > 0) {
     attrlist.forEach(function (attr) {
