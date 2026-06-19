@@ -293,7 +293,7 @@ body {
 	padding: 0;
 	list-style: none;
 	position: absolute;
-	right: 0;
+	right: 100px;
 	left: 0;
 }
 
@@ -325,6 +325,7 @@ html .clear-completed:active {
 	line-height: 20px;
 	text-decoration: none;
 	cursor: pointer;
+	color: #dc5259;
 }
 
 .clear-completed:hover {
@@ -376,4 +377,42 @@ html .clear-completed:active {
 	.filters {
 		bottom: 10px;
 	}
+}
+
+/* Кнопки перемещения */
+.todo-list li .move-up,
+.todo-list li .move-down {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  color: #ccc;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.todo-list li .move-down {
+  right: 70px; /* ← отступ от правого края */
+}
+
+.todo-list li .move-up {
+  right: 110px; /* ← отступ, чтобы не перекрывать кнопку удаления */
+}
+
+.todo-list li .move-up:hover,
+.todo-list li .move-down:hover {
+  color: #4d4d4d;
+}
+
+.todo-list li .move-up:active,
+.todo-list li .move-down:active {
+  color: #b83f45;
 }

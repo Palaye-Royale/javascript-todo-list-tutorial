@@ -108,6 +108,20 @@ function update(action, model, data) {
       new_model.hash = // (window && window.location && window.location.hash) ?
         window.location.hash // : '#/';
       break;
+    case 'MOVE':
+      const { direction, index } = data;
+      if (direction === 'up' && index > 0) {
+        // Меняем местами с предыдущей задачей
+        const temp = new_model.todos[index];
+        new_model.todos[index] = new_model.todos[index - 1];
+        new_model.todos[index - 1] = temp;
+      } else if (direction === 'down' && index < new_model.todos.length - 1) {
+        // Меняем местами со следующей задачей
+        const temp = new_model.todos[index];
+        new_model.todos[index] = new_model.todos[index + 1];
+        new_model.todos[index + 1] = temp;
+      }
+      break;
     default: // if action unrecognised or undefined,
       return model; // return model unmodified
   }   // see: https://softwareengineering.stackexchange.com/a/201786/211301
@@ -131,6 +145,7 @@ function update(action, model, data) {
  * var DOM = render_item({id: 1, title: "Build Todo List App", done: false});
  */
 function render_item (item, model, signal) {
+  const currentIndex = model.todos.findIndex(t => t.id === item.id);
   return (
     li([
       "data-id=" + item.id,
@@ -144,19 +159,28 @@ function render_item (item, model, signal) {
           "class=toggle",
           "type=checkbox",
           typeof signal === 'function' ? signal('TOGGLE', item.id) : ''
-          ], []), // <input> does not have any nested elements
+        ], []),
         label([ typeof signal === 'function' ? signal('EDIT', item.id) : '' ],
           [text(item.title)]),
         button(["class=destroy",
-          typeof signal === 'function' ? signal('DELETE', item.id) : ''])
-        ]
-      ), // </div>
-
-    ].concat(model && model.editing && model.editing === item.id ? [ // editing?
+          typeof signal === 'function' ? signal('DELETE', item.id) : ''
+        ]),
+        // ▼▼▼ СТРЕЛКИ ДЛЯ ПЕРЕМЕЩЕНИЯ ▼▼▼
+        button([
+          "class=move-up",
+          typeof signal === 'function' ? signal('MOVE', { direction: 'up', index: currentIndex }) : ''
+        ], [text('▲')]),
+        button([
+          "class=move-down",
+          typeof signal === 'function' ? signal('MOVE', { direction: 'down', index: currentIndex }) : ''
+        ], [text('▼')])
+        // ▲▲▲ КОНЕЦ СТРЕЛОК ▲▲▲
+      ])
+    ].concat(model && model.editing && model.editing === item.id ? [
       input(["class=edit", "id=" + item.id, "value=" + item.title, "autofocus"])
-    ] : []) // end concat()
-    ) // </li>
-  )
+    ] : [])
+    )
+  );
 }
 
 /**
@@ -263,7 +287,7 @@ function render_footer (model, signal) {
         typeof signal === 'function' ? signal('CLEAR_COMPLETED') : ''
         ],
         [
-          text("Удалить Выполненные ["),
+          text("Удалить выполненные ["),
           span(["id=completed-count"], [
             text(done)
           ]),
