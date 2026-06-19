@@ -56,6 +56,7 @@ fastify.delete('/todos/:id', async (req, reply) => {
 
 fastify.post('/todos/sync', async (req, reply) => {
   const { todos, userId } = req.body
+  console.log('Получен запрос /todos/sync:', { todos, userId }) // <-- ЛОГ
   if (!todos || !Array.isArray(todos)) return reply.status(400).send({ error: 'Некорректный список' })
   if (!userId) return reply.status(401).send({ error: 'Не авторизован' })
 

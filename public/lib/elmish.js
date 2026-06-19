@@ -19,30 +19,45 @@ function mount (model, update, view, root_element_id, subscriptions) {
     console.log('render вызван с моделью:', mod);
     currentModel = mod;
 
-    // ---- ПОЛУЧАЕМ userId ИЗ sessionStorage ----
-    const userId = sessionStorage.getItem('userId');
-    // ---- КОНЕЦ ----
+    const userId = parseInt(sessionStorage.getItem('userId'), 10);
+    console.log('userId в render:', userId);
 
-    // ---- СОХРАНЯЕМ НА СЕРВЕР ----
-    fetch('/todos/sync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ todos: mod.todos, userId: userId })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success && data.todos) {
-        mod.todos = data.todos;
-        currentModel = mod;
+    if (userId) {
+      // Если список задач пустой — не отправляем на сервер
+      if (mod.todos.length === 0) {
+        console.log('Список задач пуст, отправка на сервер пропущена');
+        empty(root);
+        root.appendChild(view(mod, sig));
+        return;
       }
+
+      console.log('Отправка на сервер, userId:', userId);
+      fetch('/todos/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ todos: mod.todos, userId: userId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log('Ответ сервера:', data);
+        if (data.success && data.todos) {
+          mod.todos = data.todos;
+          currentModel = mod;
+        }
+        empty(root);
+        root.appendChild(view(mod, sig));
+      })
+      .catch(err => {
+        console.error('Ошибка синхронизации:', err);
+        empty(root);
+        root.appendChild(view(mod, sig));
+      });
+    } else {
+      // ---- ГОСТЬ: сохраняем только локально ----
+      sessionStorage.setItem('guest_todos', JSON.stringify(mod.todos));
       empty(root);
       root.appendChild(view(mod, sig));
-    })
-    .catch(err => {
-      console.error('Ошибка синхронизации:', err);
-      empty(root);
-      root.appendChild(view(mod, sig));
-    });
+    }
   }
 
   function signal(action, data, model) {
@@ -68,19 +83,17 @@ function mount (model, update, view, root_element_id, subscriptions) {
         render(currentModel, signal, ROOT);
       });
   } else {
-    // Если пользователь не авторизован, показываем пустой список
     console.warn('Пользователь не авторизован, задачи не загружены');
     currentModel = { todos: [], hash: '#/' };
     render(currentModel, signal, ROOT);
   }
-  // ---- КОНЕЦ ЗАГРУЗКИ ----
 
   if (subscriptions && typeof subscriptions === 'function') {
     subscriptions(signal);
   }
 }
 
-// ВСЕ ФУНКЦИИ ДЛЯ СОЗДАНИЯ ЭЛЕМЕНТОВ (они не менялись)
+// ВСЕ ФУНКЦИИ ДЛЯ СОЗДАНИЯ ЭЛЕМЕНТОВ
 function add_attributes (attrlist, node) {
   if(attrlist && Array.isArray(attrlist) && attrlist.length > 0) {
     attrlist.forEach(function (attr) {
@@ -152,19 +165,15 @@ function input (attrlist, childnodes) { return create_element('input', attrlist,
 function label (attrlist, childnodes) { return create_element('label', attrlist, childnodes); }
 function li (attrlist, childnodes) { return create_element('li', attrlist, childnodes); }
 function span (attrlist, childnodes) { return create_element('span', attrlist, childnodes); }
-
 function strong (text_str) {
   var el = document.createElement("strong");
   el.innerHTML = text_str;
   return el;
 }
-
 function text (text) {
   return document.createTextNode(text);
 }
-
 function ul (attrlist, childnodes) { return create_element('ul', attrlist, childnodes); }
-
 function route (model, title, hash) {
   window.location.hash = hash;
   var new_state = JSON.parse(JSON.stringify(model));

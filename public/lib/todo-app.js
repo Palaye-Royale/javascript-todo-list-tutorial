@@ -178,7 +178,7 @@ function render_main (model, signal) {
         (model.all_done ? "checked=checked" : ""),
         "class=toggle-all"
       ], []),
-      label(["for=toggle-all"], [ text("Mark all as complete") ]),
+      label(["for=toggle-all"], [ text("Отметить всё, как выполненное") ]),
       ul(["class=todo-list"],
         (model.todos && model.todos.length > 0) ?
         model.todos
@@ -242,28 +242,28 @@ function render_footer (model, signal) {
             "href=#/", "id=all", "class=" +
             (model.hash === '#/' ? "selected" : '')
           ],
-          [text("All")])
+          [text("Все")])
         ]),
         li([], [
           a([
             "href=#/active", "id=active", "class=" +
             (model.hash === '#/active' ? "selected" : '')
           ],
-          [text("Active")])
+          [text("Активные")])
         ]),
         li([], [
           a([
             "href=#/completed", "id=completed", "class=" +
             (model.hash === '#/completed' ? "selected" : '')
           ],
-          [text("Completed")])
+          [text("Выполненные")])
         ])
       ]), // </ul>
       button(["class=clear-completed", "style=display:" + display_clear,
         typeof signal === 'function' ? signal('CLEAR_COMPLETED') : ''
         ],
         [
-          text("Clear completed ["),
+          text("Удалить Выполненные ["),
           span(["id=completed-count"], [
             text(done)
           ]),
@@ -296,7 +296,7 @@ function view (model, signal) {
         input([
           "id=new-todo",
           "class=new-todo",
-          "placeholder=What needs to be done?",
+          "placeholder=Что нужно сделать?",
           "autofocus"
         ], []) // <input> is "self-closing"
       ]), // </header>
