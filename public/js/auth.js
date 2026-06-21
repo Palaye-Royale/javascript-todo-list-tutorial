@@ -56,7 +56,7 @@ async function syncGuestTodos(userId) {
 
   try {
     // 1. Загружаем текущие задачи пользователя с сервера
-    const res = await fetch('/todos?userId=' + userId);
+    const res = await fetch('https://todo-app-production-ac21.up.railway.app/todos?userId=' + userId);
     const serverTodos = await res.json();
     console.log('Задачи на сервере до объединения:', serverTodos);
 
@@ -77,7 +77,7 @@ async function syncGuestTodos(userId) {
     console.log('Объединённый список для отправки:', allTodos);
 
     // 3. Отправляем объединённый список на сервер (через /sync)
-    const syncRes = await fetch('/todos/sync', {
+    const syncRes = await fetch('https://todo-app-production-ac21.up.railway.app/todos/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -164,7 +164,7 @@ registerForm.addEventListener('submit', async (e) => {
   }
 
     try {
-      const res = await fetch('/api/register', {
+      const res = await fetch('https://todo-app-production-ac21.up.railway.app/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -172,7 +172,7 @@ registerForm.addEventListener('submit', async (e) => {
       const data = await res.json();
 
       if (res.ok) {
-        const loginRes = await fetch('/api/login', {
+        const loginRes = await fetch('https://todo-app-production-ac21.up.railway.app/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -205,7 +205,7 @@ registerForm.addEventListener('submit', async (e) => {
     loginError.textContent = '';
 
     try {
-      const res = await fetch('/api/login', {
+      const res = await fetch('https://todo-app-production-ac21.up.railway.app/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
