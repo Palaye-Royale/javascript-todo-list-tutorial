@@ -116,10 +116,11 @@ fastify.post('/api/login', async (req, reply) => {
   reply.send({ success: true, userId: user.id })
 })
 
-fastify.listen({ port: 3000}, (err) => {
-    if (err) {
-        console.error(err)
-        process.exit(1)
-    }
-    console.log('Сервер запущен на http:localhost:3000')
-})
+const port = process.env.PORT || 3000;
+fastify.listen({ port: port, host: '0.0.0.0' }, (err) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  console.log(`Сервер запущен на порту ${port}`);
+});
