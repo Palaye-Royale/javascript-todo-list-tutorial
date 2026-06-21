@@ -1,4 +1,12 @@
 const fastify = require('fastify')({logger: false})
+const cors = require('@fastify/cors')
+
+fastify.register(cors, {
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+})
+
 const Database = require('better-sqlite3')
 const path = require('path')
 const bcrypt = require('bcrypt')
@@ -25,6 +33,7 @@ db.exec(`
 fastify.register(require('@fastify/static'), {
   root: path.join(__dirname, '..', 'public')
 })
+
 
 fastify.get('/todos', async (req, reply) => {
   const userId = req.query.userId
