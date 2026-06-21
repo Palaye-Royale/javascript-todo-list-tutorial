@@ -32,7 +32,7 @@ function mount (model, update, view, root_element_id, subscriptions) {
       }
 
       console.log('Отправка на сервер, userId:', userId);
-      fetch('/todos/sync', {
+      fetch('https://todo-app-production-ac21.up.railway.app/todos/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ todos: mod.todos, userId: userId })
@@ -70,7 +70,7 @@ function mount (model, update, view, root_element_id, subscriptions) {
   // ---- ЗАГРУЖАЕМ ЗАДАЧИ С СЕРВЕРА ----
   const userId = sessionStorage.getItem('userId');
   if (userId) {
-    fetch('/todos?userId=' + userId)
+    fetch('https://todo-app-production-ac21.up.railway.app/todos?userId=' + userId)
       .then(res => res.json())
       .then(todosFromServer => {
         console.log('Данные с сервера:', todosFromServer);
