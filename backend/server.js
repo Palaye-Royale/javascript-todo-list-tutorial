@@ -1,5 +1,8 @@
-const fastify = require('fastify')({logger: false})
+const fastify = require('fastify')({ logger: false })
 const cors = require('@fastify/cors')
+const Database = require('better-sqlite3')
+const path = require('path')
+const bcrypt = require('bcrypt')
 
 fastify.register(cors, {
   origin: '*',
@@ -7,12 +10,7 @@ fastify.register(cors, {
   allowedHeaders: ['Content-Type', 'Authorization']
 })
 
-const Database = require('better-sqlite3')
-const path = require('path')
-const bcrypt = require('bcrypt')
-
 const db = new Database('todo.db')
-
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,11 +28,12 @@ db.exec(`
   );
 `)
 
+// Статика
 fastify.register(require('@fastify/static'), {
   root: path.join(__dirname, '..', 'public')
 })
 
-
+// Все задачи пользователя
 fastify.get('/todos', async (req, reply) => {
   const userId = req.query.userId
   if (!userId) return reply.status(401).send({ error: 'Не авторизован' })
@@ -42,6 +41,7 @@ fastify.get('/todos', async (req, reply) => {
   reply.send(todos)
 })
 
+// Добавление задачи
 fastify.post('/todos', async (req, reply) => {
   const { title, userId } = req.body
   if (!title) return reply.status(400).send({ error: 'Нет названия' })
@@ -52,6 +52,7 @@ fastify.post('/todos', async (req, reply) => {
   reply.send(newTodo)
 })
 
+// Удаление задачи
 fastify.delete('/todos/:id', async (req, reply) => {
   const userId = req.query.userId
   if (!userId) return reply.status(401).send({ error: 'Не авторизован' })
@@ -63,13 +64,12 @@ fastify.delete('/todos/:id', async (req, reply) => {
   reply.send({ success: true })
 })
 
+// Синхронизация списка задач
 fastify.post('/todos/sync', async (req, reply) => {
   const { todos, userId } = req.body
-  console.log('Получен запрос /todos/sync:', { todos, userId }) // <-- ЛОГ
   if (!todos || !Array.isArray(todos)) return reply.status(400).send({ error: 'Некорректный список' })
   if (!userId) return reply.status(401).send({ error: 'Не авторизован' })
 
-  // Удаляем только задачи этого пользователя
   db.prepare('DELETE FROM todos WHERE user_id = ?').run(userId)
 
   const insert = db.prepare('INSERT INTO todos (title, done, user_id) VALUES (?, ?, ?)')
@@ -92,20 +92,17 @@ fastify.post('/api/register', async (req, reply) => {
   if (!email || !password) {
     return reply.status(400).send({ error: 'Email и пароль обязательны' })
   }
-
-  // Проверяем, не занят ли email
   const existing = db.prepare('SELECT * FROM users WHERE email = ?').get(email)
   if (existing) {
     return reply.status(400).send({ error: 'Пользователь уже существует' })
   }
 
-  // Хэшируем пароль
   const hash = await bcrypt.hash(password, 10)
   const result = db.prepare('INSERT INTO users (email, password_hash) VALUES (?, ?)').run(email, hash)
   reply.send({ success: true, userId: result.lastInsertRowid })
 })
 
-// Логин
+// Вход
 fastify.post('/api/login', async (req, reply) => {
   const { email, password } = req.body
   if (!email || !password) {
@@ -125,6 +122,7 @@ fastify.post('/api/login', async (req, reply) => {
   reply.send({ success: true, userId: user.id })
 })
 
+// Запуск сервера
 const port = process.env.PORT || 3000;
 fastify.listen({ port: port, host: '0.0.0.0' }, (err) => {
   if (err) {

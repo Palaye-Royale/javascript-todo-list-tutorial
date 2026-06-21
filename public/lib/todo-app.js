@@ -18,7 +18,6 @@ var initial_model = {
  * @return {Object} new_model - the transformed model.
  */
 function update(action, model, data) {
-    // ЗАЩИТА: если модель пришла пустая или не объект — создаём пустой список
   if (!model || typeof model !== 'object') {
     console.warn('update получил некорректную модель, создаём пустую');
     model = { todos: [], hash: '#/' };
@@ -111,12 +110,10 @@ function update(action, model, data) {
     case 'MOVE':
       const { direction, index } = data;
       if (direction === 'up' && index > 0) {
-        // Меняем местами с предыдущей задачей
         const temp = new_model.todos[index];
         new_model.todos[index] = new_model.todos[index - 1];
         new_model.todos[index - 1] = temp;
       } else if (direction === 'down' && index < new_model.todos.length - 1) {
-        // Меняем местами со следующей задачей
         const temp = new_model.todos[index];
         new_model.todos[index] = new_model.todos[index + 1];
         new_model.todos[index + 1] = temp;
@@ -165,7 +162,6 @@ function render_item (item, model, signal) {
         button(["class=destroy",
           typeof signal === 'function' ? signal('DELETE', item.id) : ''
         ]),
-        // ▼▼▼ СТРЕЛКИ ДЛЯ ПЕРЕМЕЩЕНИЯ ▼▼▼
         button([
           "class=move-up",
           typeof signal === 'function' ? signal('MOVE', { direction: 'up', index: currentIndex }) : ''
@@ -174,7 +170,6 @@ function render_item (item, model, signal) {
           "class=move-down",
           typeof signal === 'function' ? signal('MOVE', { direction: 'down', index: currentIndex }) : ''
         ], [text('▼')])
-        // ▲▲▲ КОНЕЦ СТРЕЛОК ▲▲▲
       ])
     ].concat(model && model.editing && model.editing === item.id ? [
       input(["class=edit", "id=" + item.id, "value=" + item.title, "autofocus"])
@@ -237,52 +232,44 @@ function render_main (model, signal) {
  */
 function render_footer (model, signal) {
 
-  // count how many "active" (not yet done) items by filtering done === false:
   var done = (model.todos && model.todos.length > 0) ?
     model.todos.filter( function (i) { return i.done; }).length : 0;
   var count = (model.todos && model.todos.length > 0) ?
     model.todos.filter( function (i) { return !i.done; }).length : 0;
 
-  // Requirement #1 - No Todos, should hide #footer and #main
   var display = (count > 0 || done > 0) ? "block" : "none";
-
-  // number of completed items:
-  var done = (model.todos && model.todos.length > 0) ?
-    (model.todos.length - count) : 0;
   var display_clear =  (done > 0) ? "block;" : "none;";
 
-  // pluarisation of number of items:
-  var left = (" item" + ( count > 1 || count === 0 ? 's' : '') + " left");
+// Счётчик для фильтров
+  var total = model.todos ? model.todos.length : 0;
+  var activeCount = model.todos ? model.todos.filter(function(i) { return !i.done; }).length : 0;
+  var completedCount = model.todos ? model.todos.filter(function(i) { return i.done; }).length : 0;
 
   return (
     footer(["class=footer", "id=footer", "style=display:" + display], [
-      span(["class=todo-count", "id=count"], [
-        strong(count),
-        text(left)
-      ]),
       ul(["class=filters"], [
         li([], [
           a([
             "href=#/", "id=all", "class=" +
             (model.hash === '#/' ? "selected" : '')
           ],
-          [text("Все")])
+          [text("Все (" + total + ")")])
         ]),
         li([], [
           a([
             "href=#/active", "id=active", "class=" +
             (model.hash === '#/active' ? "selected" : '')
           ],
-          [text("Активные")])
+          [text("Активные (" + activeCount + ")")])
         ]),
         li([], [
           a([
             "href=#/completed", "id=completed", "class=" +
             (model.hash === '#/completed' ? "selected" : '')
           ],
-          [text("Выполненные")])
+          [text("Выполненные (" + completedCount + ")")])
         ])
-      ]), // </ul>
+      ]),
       button(["class=clear-completed", "style=display:" + display_clear,
         typeof signal === 'function' ? signal('CLEAR_COMPLETED') : ''
         ],

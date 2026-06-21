@@ -293,7 +293,7 @@ body {
 	padding: 0;
 	list-style: none;
 	position: absolute;
-	right: 100px;
+	right: 200px;
 	left: 0;
 }
 
@@ -400,11 +400,11 @@ html .clear-completed:active {
 }
 
 .todo-list li .move-down {
-  right: 70px; /* ← отступ от правого края */
+  right: 70px;
 }
 
 .todo-list li .move-up {
-  right: 110px; /* ← отступ, чтобы не перекрывать кнопку удаления */
+  right: 110px;
 }
 
 .todo-list li .move-up:hover,
@@ -415,4 +415,23 @@ html .clear-completed:active {
 .todo-list li .move-up:active,
 .todo-list li .move-down:active {
   color: #b83f45;
+}
+
+.logout-button {
+	display: none;
+	position: fixed;
+	top: 20px; 
+	right: 20px; 
+	z-index: 100; 
+	background: #b83f45; 
+	color: #fff; 
+	border: none; 
+	padding: 8px 16px; 
+	border-radius: 20px; 
+	cursor: pointer; 
+	font-size: 14px;
+}
+
+.logout-button:hover {
+  background: #a03339;
 }

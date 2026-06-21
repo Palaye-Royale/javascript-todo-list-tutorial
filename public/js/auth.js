@@ -1,7 +1,4 @@
-// public/js/auth.js
-
 (function() {
-  // Элементы
   const loginModal = document.getElementById('login-modal');
   const registerModal = document.getElementById('register-modal');
   const loginLink = document.getElementById('login-link');
@@ -37,66 +34,54 @@
     element.classList.remove('hidden');
   }
 
-  // Функция для переноса гостевых задач на сервер
-async function syncGuestTodos(userId) {
-  console.log('=== syncGuestTodos вызвана, userId:', userId);
-  const guestTodos = sessionStorage.getItem('guest_todos');
-  console.log('guestTodos из sessionStorage:', guestTodos);
+  // Функция для переноса задач неавторизованного пользователя на сервер
+  async function syncGuestTodos(userId) {
+    const guestTodos = sessionStorage.getItem('guest_todos');
 
-  if (!guestTodos || guestTodos === '[]' || guestTodos === 'null') {
-    console.log('Нет гостевых задач или они пустые, выходим');
-    return;
-  }
+    if (!guestTodos || guestTodos === '[]' || guestTodos === 'null') {
+      return;
+    }
 
-  const guestTodosParsed = JSON.parse(guestTodos);
-  if (guestTodosParsed.length === 0) {
-    console.log('Гостевой список пуст, выходим');
-    return;
-  }
+    const guestTodosParsed = JSON.parse(guestTodos);
+    if (guestTodosParsed.length === 0) {
+      return;
+    }
 
-  try {
-    // 1. Загружаем текущие задачи пользователя с сервера
-    const res = await fetch('https://todo-app-production-ac21.up.railway.app/todos?userId=' + userId);
-    const serverTodos = await res.json();
-    console.log('Задачи на сервере до объединения:', serverTodos);
+    try {
+      const res = await fetch('https://todo-app-production-ac21.up.railway.app/todos?userId=' + userId);
+      const serverTodos = await res.json();
 
-    // 2. Объединяем: серверные + гостевые (избегаем дублирования по id)
-    const allTodos = [...serverTodos];
-    for (const guestTodo of guestTodosParsed) {
-      // Проверяем, нет ли уже такой задачи на сервере (по названию)
-      const exists = allTodos.some(t => t.title === guestTodo.title && t.done === guestTodo.done);
-      if (!exists) {
-        allTodos.push({
-          id: allTodos.length + 1, // временный id, сервер сгенерирует свой
-          title: guestTodo.title,
-          done: guestTodo.done || false
-        });
+      const allTodos = [...serverTodos];
+      for (const guestTodo of guestTodosParsed) {
+        const exists = allTodos.some(t => t.title === guestTodo.title && t.done === guestTodo.done);
+        if (!exists) {
+          allTodos.push({
+            id: allTodos.length + 1,
+            title: guestTodo.title,
+            done: guestTodo.done || false
+          });
+        }
       }
+
+      const syncRes = await fetch('https://todo-app-production-ac21.up.railway.app/todos/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          todos: allTodos,
+          userId: userId
+        })
+      });
+
+      if (syncRes.ok) {
+        sessionStorage.removeItem('guest_todos');
+      } else {
+        console.error('Ошибка объединения задач');
+      }
+    } catch (err) {
+      console.error('Ошибка соединения при объединении задач:', err);
     }
-
-    console.log('Объединённый список для отправки:', allTodos);
-
-    // 3. Отправляем объединённый список на сервер (через /sync)
-    const syncRes = await fetch('https://todo-app-production-ac21.up.railway.app/todos/sync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        todos: allTodos,
-        userId: userId
-      })
-    });
-
-    if (syncRes.ok) {
-      sessionStorage.removeItem('guest_todos');
-      console.log('Гостевые задачи успешно объединены с серверными');
-    } else {
-      console.error('Ошибка объединения задач');
-    }
-  } catch (err) {
-    console.error('Ошибка соединения при объединении задач:', err);
   }
-}
-  // Обновление интерфейса в зависимости от статуса авторизации
+
   function updateUI() {
     const userId = sessionStorage.getItem('userId');
     if (userId) {
@@ -108,20 +93,15 @@ async function syncGuestTodos(userId) {
     }
   }
 
-  // Выход из системы
+  // Выход из аккаунта
   function logout() {
-    // Удаляем данные пользователя
     sessionStorage.removeItem('userId');
     sessionStorage.removeItem('guest_todos');
-    
-    // Обновляем интерфейс
     updateUI();
-    
-    // Перезагружаем страницу, чтобы приложение перешло в режим гостя
     window.location.reload();
   }
 
-  // Клик по ссылкам
+  // Клик по ссылкам входа и регистрации
   loginLink.addEventListener('click', (e) => {
     e.preventDefault();
     openModal(loginModal);
@@ -132,7 +112,7 @@ async function syncGuestTodos(userId) {
     openModal(registerModal);
   });
 
-  // Закрытие по крестику
+  // Закрытие модалок по крестику
   closeModalBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const modalType = btn.dataset.modal;
@@ -141,27 +121,25 @@ async function syncGuestTodos(userId) {
     });
   });
 
-  // Обработка регистрации
-registerForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('register-email').value;
-  const password = document.getElementById('register-password').value;
-  const passwordConfirm = document.getElementById('register-password-confirm').value;
+  // Регистрация
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const passwordConfirm = document.getElementById('register-password-confirm').value;
 
-  registerError.classList.add('hidden');
-  registerError.textContent = '';
+    registerError.classList.add('hidden');
+    registerError.textContent = '';
 
-  // Проверка совпадения паролей
-  if (password !== passwordConfirm) {
-    showError(registerError, 'Пароли не совпадают');
-    return;
-  }
+    if (password !== passwordConfirm) {
+      showError(registerError, 'Пароли не совпадают');
+      return;
+    }
 
-  // Проверка длины пароля (опционально)
-  if (password.length < 6) {
-    showError(registerError, 'Пароль должен быть не менее 6 символов');
-    return;
-  }
+    if (password.length < 6) {
+      showError(registerError, 'Пароль должен быть не менее 6 символов');
+      return;
+    }
 
     try {
       const res = await fetch('https://todo-app-production-ac21.up.railway.app/api/register', {
@@ -195,7 +173,7 @@ registerForm.addEventListener('submit', async (e) => {
     }
   });
 
-  // Обработка логина
+  // Вход
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
@@ -229,6 +207,5 @@ registerForm.addEventListener('submit', async (e) => {
   // Кнопка "Выйти"
   logoutBtn.addEventListener('click', logout);
 
-  // Инициализация UI
   updateUI();
 })();

@@ -10,28 +10,26 @@ function empty (node) {
 /**
  * `mount` mounts the app in the "root" DOM Element.
  */
+
+// Запуск приложения
 function mount (model, update, view, root_element_id, subscriptions) {
-  console.log('mount вызвана!');
   var ROOT = document.getElementById(root_element_id);
   var currentModel = model || { todos: [], hash: '#/' };
 
+  // Интерфейс
   function render (mod, sig, root) {
-    console.log('render вызван с моделью:', mod);
     currentModel = mod;
 
     const userId = parseInt(sessionStorage.getItem('userId'), 10);
-    console.log('userId в render:', userId);
 
     if (userId) {
-      // Если список задач пустой — не отправляем на сервер
       if (mod.todos.length === 0) {
-        console.log('Список задач пуст, отправка на сервер пропущена');
         empty(root);
         root.appendChild(view(mod, sig));
         return;
       }
 
-      console.log('Отправка на сервер, userId:', userId);
+      // Сохранение задач на сервер
       fetch('https://todo-app-production-ac21.up.railway.app/todos/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -39,7 +37,6 @@ function mount (model, update, view, root_element_id, subscriptions) {
       })
       .then(res => res.json())
       .then(data => {
-        console.log('Ответ сервера:', data);
         if (data.success && data.todos) {
           mod.todos = data.todos;
           currentModel = mod;
@@ -53,13 +50,13 @@ function mount (model, update, view, root_element_id, subscriptions) {
         root.appendChild(view(mod, sig));
       });
     } else {
-      // ---- ГОСТЬ: сохраняем только локально ----
       sessionStorage.setItem('guest_todos', JSON.stringify(mod.todos));
       empty(root);
       root.appendChild(view(mod, sig));
     }
   }
 
+  // Обработчик для действия пользователя
   function signal(action, data, model) {
     return function callback() {
       var updatedModel = update(action, currentModel, data);
@@ -67,13 +64,12 @@ function mount (model, update, view, root_element_id, subscriptions) {
     };
   }
 
-  // ---- ЗАГРУЖАЕМ ЗАДАЧИ С СЕРВЕРА ----
+  // Загрузка задачи с сервера
   const userId = sessionStorage.getItem('userId');
   if (userId) {
     fetch('https://todo-app-production-ac21.up.railway.app/todos?userId=' + userId)
       .then(res => res.json())
       .then(todosFromServer => {
-        console.log('Данные с сервера:', todosFromServer);
         currentModel = { todos: todosFromServer, hash: '#/' };
         render(currentModel, signal, ROOT);
       })
@@ -83,7 +79,6 @@ function mount (model, update, view, root_element_id, subscriptions) {
         render(currentModel, signal, ROOT);
       });
   } else {
-    console.warn('Пользователь не авторизован, задачи не загружены');
     currentModel = { todos: [], hash: '#/' };
     render(currentModel, signal, ROOT);
   }
@@ -93,7 +88,6 @@ function mount (model, update, view, root_element_id, subscriptions) {
   }
 }
 
-// ВСЕ ФУНКЦИИ ДЛЯ СОЗДАНИЯ ЭЛЕМЕНТОВ
 function add_attributes (attrlist, node) {
   if(attrlist && Array.isArray(attrlist) && attrlist.length > 0) {
     attrlist.forEach(function (attr) {

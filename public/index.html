@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Todo List</title>
-  <!-- Подключаем стили -->
   <link rel="stylesheet" href="lib/todomvc-app.css">
   <link rel="stylesheet" href="css/auth.css">
   <link rel="shortcut icon" href="lib/favicon.ico" type="image/x-icon">
@@ -20,8 +19,8 @@
     </span>
   </div>
 
-  <!-- Кнопка "Выйти" (по умолчанию скрыта) -->
-  <button id="logout-btn" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 100; background: #b83f45; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px;">
+  <!-- Кнопка "Выйти" -->
+  <button id="logout-btn" class="logout-button">
     Выйти
   </button>
 
@@ -57,12 +56,11 @@
   </div>
 </div>
 
-  <!-- Подключаем скрипты -->
   <script src="lib/elmish.js"></script>
   <script src="lib/todo-app.js"></script>
   <script src="js/auth.js"></script>
   <script>
-    // Запускаем приложение
+    // Запуск приложения
     var model = { todos: [], hash: '#/' };
     mount(model, update, view, 'app', subscriptions);
   </script>
