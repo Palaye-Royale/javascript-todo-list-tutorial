@@ -37,7 +37,7 @@ https://javascript-todo-list-tutorial-production.up.railway.app/
 
 
 ## Демонстрация проекта
-![alt text](delete.gif)
+![alt text](demo.gif)
 
 
 ## Бейдж CodeFactor
