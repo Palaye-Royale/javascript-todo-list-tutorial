@@ -36,6 +36,9 @@ npm start
 https://javascript-todo-list-tutorial-production.up.railway.app/
 
 
-## Бейдж CodeFactor
-[![CodeFactor](https://www.codefactor.io/repository/github/palaye-royale/javascript-todo-list-tutorial/badge)](https://www.codefactor.io/repository/github/palaye-royale/javascript-todo-list-tutorial)
+## Демонстрация проекта
+![alt text](delete.gif)
 
+
+## Бейдж CodeFactor
+[![CodeFactor](https://www.codefactor.io/repository/github/palaye-royale/javascript-todo-list-tutorial/badge/main)](https://www.codefactor.io/repository/github/palaye-royale/javascript-todo-list-tutorial/overview/main)
