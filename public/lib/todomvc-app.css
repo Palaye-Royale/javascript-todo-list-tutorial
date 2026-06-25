@@ -43,7 +43,7 @@ body {
 
 .todoapp {
 	background: #fff;
-	margin: 130px 0 40px 0;
+	margin: 130px 0 40px;
 	position: relative;
 	box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2),
 	            0 25px 50px 0 rgba(0, 0, 0, 0.1);
@@ -137,7 +137,7 @@ body {
 	content: '❯';
 	font-size: 22px;
 	color: #e6e6e6;
-	padding: 10px 27px 10px 27px;
+	padding: 10px 27px;
 }
 
 .toggle-all:checked + label:before {
